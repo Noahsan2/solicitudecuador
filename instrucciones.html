@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Tómate una selfie!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1 {
+            color: #1a1a1a;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        .illustration {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 40px;
+        }
+
+        .circle {
+            width: 100%;
+            height: 100%;
+            border: 8px solid #FFD700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: #f0f0f5;
+        }
+
+        .avatar-image {
+            width: 140px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .low-opacity {
+            opacity: 0.3;
+        }
+
+        .status-icon {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .status-icon.correct {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-icon.incorrect {
+            background: #dc3545;
+            color: white;
+        }
+
+        h2 {
+            color: #1a3a5c;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .description {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .dot.active {
+            background: #1a3a5c;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .btn-back {
+            background: #e9ecef;
+            color: #4a90e2;
+        }
+
+        .btn-back:hover {
+            background: #dee2e6;
+        }
+
+        .btn-next {
+            background: #4a90e2;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #357abd;
+        }
+
+        .btn-primary {
+            background: #FFD700;
+            color: #1a1a1a;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #F0C800;
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #666;
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .single-button {
+            display: flex;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Pantalla 1 -->
+        <div class="screen active" id="screen1">
+            <h1>¡Tómate una selfie!</h1>
+            <p class="subtitle">Intenta que la foto sea idéntica a la de tu cédula.<br>Sigue las recomendaciones:</p>
+            
+            <div class="illustration">
+                <div class="circle">
+                    <img src="avatar.png" alt="Avatar" class="avatar-image">
+                    <div class="status-icon correct">✓</div>
+                </div>
+            </div>
+
+            <h2>Evita accesorios</h2>
+            <p class="description">No uses mascarilla, lentes u otros elementos que tapen tu rostro.</p>
+
+            <div class="dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+
+            <div class="buttons single-button">
+                <button class="btn-next" onclick="nextScreen()">Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Pantalla 2 -->
+        <div class="screen" id="screen2">
+            <h1>¡Tómate una selfie!</h1>
+            <p class="subtitle">Intenta que la foto sea idéntica a la de tu cédula.<br>Sigue las recomendaciones:</p>
+            
+            <div class="illustration">
+                <div class="circle">
+                    <img src="avatar.png" alt="Avatar" class="avatar-image low-opacity">
+                    <div class="status-icon incorrect">✗</div>
+                </div>
+            </div>
+
+            <h2>Busca un lugar bien iluminado</h2>
+            <p class="description">Debe notarse claramente tu rostro. Evita sombras o luces fuertes desde atrás.</p>
+
+            <div class="dots">
+                <div class="dot"></div>
+                <div class="dot active"></div>
+                <div class="dot"></div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-back" onclick="prevScreen()">← Atrás</button>
+                <button class="btn-next" onclick="nextScreen()">Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Pantalla 3 -->
+        <div class="screen" id="screen3">
+            <h1>¡Tómate una selfie!</h1>
+            <p class="subtitle">Intenta que la foto sea idéntica a la de tu cédula.<br>Sigue las recomendaciones:</p>
+            
+            <div class="illustration">
+                <div class="circle">
+                    <img src="avatar.png" alt="Avatar" class="avatar-image">
+                    <div class="status-icon incorrect">✗</div>
+                </div>
+            </div>
+
+            <h2>Derecho y de pie</h2>
+            <p class="description">Ponte de pie, coloca el celular recto y a la altura de tus ojos. Tu rostro debe estar dentro del círculo.</p>
+
+            <div class="dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot active"></div>
+            </div>
+
+            <button class="btn-primary" onclick="takePicture()">¡Estoy listo! Tomar foto</button>
+            <button class="btn-secondary" onclick="resetScreens()">Ver nuevamente</button>
+        </div>
+    </div>
+
+    <script>
+        let currentScreen = 1;
+        const totalScreens = 3;
+
+        function showScreen(screenNum) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('screen' + screenNum).classList.add('active');
+            currentScreen = screenNum;
+        }
+
+        function nextScreen() {
+            if (currentScreen < totalScreens) {
+                showScreen(currentScreen + 1);
+            }
+        }
+
+        function prevScreen() {
+            if (currentScreen > 1) {
+                showScreen(currentScreen - 1);
+            }
+        }
+
+        function resetScreens() {
+            showScreen(1);
+        }
+
+        function takePicture() {
+            window.location.href = 'selfie-verificacion.html';
+        }
+    </script>
+</body>
+</html>

